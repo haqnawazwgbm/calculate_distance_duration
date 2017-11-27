@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Google map api example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h2>Form</h2>
+  <form action="/action_page.php">
+    <div class="form-group">
+      <label for="from_location">From Location:</label>
+      <input type="text" class="form-control" id="from_location" placeholder="Enter from location" name="from_location">
+    </div>
+      <div class="form-group">
+      <label for="to_location">To Location:</label>
+      <input type="text" class="form-control" id="to_location" placeholder="Enter to location" name="to_location">
+    </div>
+ 
+    <div class="form-group">
+      <label for="distance">Distance:</label>
+      <input type="text" class="form-control" readonly id="distance" placeholder="Distance will get by google map api" name="distance">
+    </div>
+    <div class="form-group">
+      <label for="duration">Duration:</label>
+      <input type="text" class="form-control" readonly id="duration" placeholder="Duration will get by google map api" name="duration">
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+  </form>
+</div>
+   </div>
+    <script>
+          function initMap() {
+            // This is default latitude and longitude
+            var latitude1 = 39.46; 
+            var longitude1 = -0.36;
+            var latitude2 = 40.40;
+            var longitude2 = -3.68;
+            var distance;
+            // This is autocomplete for input from location and to location
+            var from_location = document.getElementById('from_location');
+            var to_location = document.getElementById('to_location');
+            var fromautocomplete = new google.maps.places.Autocomplete(from_location);
+            var toautocomplete = new google.maps.places.Autocomplete(to_location);
+
+            // Get from lat and lang 
+             google.maps.event.addListener(fromautocomplete, 'place_changed', function () {
+                var place = fromautocomplete.getPlace();
+                latitude1 = place.geometry.location.lat();
+                longitude1 = place.geometry.location.lng();
+                        //alert("This function is working!");
+                    //alert(place.name);
+                   // alert(place.address_components[0].long_name);
+                });
+
+            // get to to lat and lang
+             google.maps.event.addListener(toautocomplete, 'place_changed', function () {
+                var place = toautocomplete.getPlace();
+                latitude2 = place.geometry.location.lat();
+                longitude2 = place.geometry.location.lng();
+                   
+
+                    var service = new google.maps.DistanceMatrixService();
+                      service.getDistanceMatrix({
+                        origins: [from_location.value],
+                        destinations: [to_location.value],
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        unitSystem: google.maps.UnitSystem.METRIC,
+                        avoidHighways: false,
+                        avoidTolls: false
+                    }, function (response, status) {
+                        if (status == google.maps.DistanceMatrixStatus.OK && response.rows[0].elements[0].status != "ZERO_RESULTS") {
+                            var distance = response.rows[0].elements[0].distance.text;
+                            var duration = response.rows[0].elements[0].duration.text;
+                            $('#distance').val(distance);
+                            $('#duration').val(duration);
+                 
+                        } else {
+                            alert("Unable to find the distance via road.");
+                        }
+                    });
+
+                });
+
+                
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9Ho735UhQQ3pDmXBaSC_FSnja26nsqoE&libraries=geometry,places&callback=initMap"
+        async defer></script>
+</body>
+</html>
